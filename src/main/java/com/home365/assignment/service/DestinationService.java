@@ -3,12 +3,14 @@ package com.home365.assignment.service;
 import com.home365.assignment.dto.DestinationDTO;
 import com.home365.assignment.entities.Destination;
 import com.home365.assignment.repository.DestinationRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 
+@Slf4j
 @Service
 public class DestinationService {
 
@@ -18,12 +20,14 @@ public class DestinationService {
         this.destinationRepository = destinationRepository;
     }
 
-    public Destination addNewDestination(DestinationDTO location) {
-        Optional<Destination> optional = destinationRepository.findFirstByName(location.getName());
+    public Destination addNewDestination(DestinationDTO destinationDTO) {
+        Optional<Destination> optional = destinationRepository.findFirstByName(destinationDTO.getName());
         if (optional.isPresent()) {
+            log.info("Destination with name: {} already exists", destinationDTO.getName());
             return optional.get();
         }
-        return destinationRepository.save(new Destination(location));
+        log.info("Destination with name: {} created successfuly", destinationDTO.getName());
+        return destinationRepository.save(new Destination(destinationDTO));
     }
 
     public Destination getByName(String location) {

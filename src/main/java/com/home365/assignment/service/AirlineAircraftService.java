@@ -4,9 +4,10 @@ import com.home365.assignment.entities.Aircraft;
 import com.home365.assignment.entities.Airline;
 import com.home365.assignment.entities.AirlineAircraft;
 import com.home365.assignment.repository.AirlineAircraftRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-
+@Slf4j
 @Service
 public class AirlineAircraftService {
 
@@ -25,6 +26,7 @@ public class AirlineAircraftService {
     public Airline sellAircraft(Long airlineAircraftId) {
         AirlineAircraft airlineAircraft = airlineAircraftRepository.findById(airlineAircraftId).orElse(null);
         if (airlineAircraft == null) {
+            log.info("No airlineAircraft with id {} ", airlineAircraftId);
             return null;
         }
         Airline airline = airlineAircraft.getAirline();
@@ -32,6 +34,7 @@ public class AirlineAircraftService {
         airlineAircraftRepository.delete(airlineAircraft);
         return airline;
     }
+
     public AirlineAircraft getAirlineAircraft(Long airlineAircraftId) {
         return airlineAircraftRepository.findById(airlineAircraftId).orElse(null);
     }

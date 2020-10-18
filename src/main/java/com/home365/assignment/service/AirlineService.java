@@ -8,6 +8,7 @@ import com.home365.assignment.entities.Airline;
 import com.home365.assignment.entities.AirlineAircraft;
 import com.home365.assignment.entities.Destination;
 import com.home365.assignment.repository.AirlineRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class AirlineService {
 
@@ -51,19 +53,23 @@ public class AirlineService {
     public ResponseEntity<?> buyAircraft(String airlineName, String aircraftName) {
         Aircraft aircraft = aircraftService.findFirstByName(aircraftName);
         if (aircraft == null) {
+            log.info("Aircraft with name: {} not found", aircraftName);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Airline airline = airlineRepository.findFirstByName(airlineName);
         if (airline == null) {
+            log.info("Airline with name: {} not found", airlineName);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         boolean affordable = airline.updateBudget(aircraft.getPrice() * -1);
         if (!affordable) {
+            log.info("Airline with name: {} dont have enough money", airlineName);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         airlineAircraftService.addAirlineAircraft(airline, aircraft);
         airlineRepository.save(airline);
+        log.info("Airline with name: {} bought {}", airlineName, aircraftName);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -79,6 +85,7 @@ public class AirlineService {
     public List<DistancesDTO> distances(String airlineName) {
         Airline airline = airlineRepository.findFirstByName(airlineName);
         if (airline == null) {
+            log.info("No airline with name {}", airlineName);
             return null;
         }
         return destinationService.getAll()
@@ -97,6 +104,7 @@ public class AirlineService {
     public List<DistancesDTO> availableDestination(String airlineName) {
         Airline airline = airlineRepository.findFirstByName(airlineName);
         if (airline == null || airline.getAirlineAircraft().size() == 0) {
+            log.info("There is no airline with name {} || airline dont have any aircraft", airlineName);
             return null;
         }
 
@@ -115,17 +123,19 @@ public class AirlineService {
     public ResponseEntity<?> ownershipTransfer(Long airlineAircraftId, Long newOwnerId) {
         Airline newOwner = airlineRepository.findById(newOwnerId).orElse(null);
         if (newOwner == null) {
-            //wrong airlineAircraftId
+            log.info("airline_aircraft_id: {} not exists", airlineAircraftId);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         AirlineAircraft airlineAircraft = airlineAircraftService.getAirlineAircraft(airlineAircraftId);
-        if (newOwner == airlineAircraft.getAirline()){
-            return null;
+        if (newOwner == airlineAircraft.getAirline()) {
+            log.info("airline_aircraft_id: {} is already owned by {}", airlineAircraftId, newOwnerId);
+            return new ResponseEntity<>("Already own this aircraft", HttpStatus.CONFLICT);
         }
         int sellPrice = airlineAircraft.getSellPrice();
         boolean affordable = newOwner.updateBudget(sellPrice * -1);
         if (!affordable) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            log.info("{} dont have enough money", newOwner.getName());
+            return new ResponseEntity<>(newOwner.getName() + "dont have enough money", HttpStatus.BAD_REQUEST);
         }
         Airline oldOwner = airlineAircraft.getAirline();
         oldOwner.updateBudget(sellPrice);
@@ -134,7 +144,7 @@ public class AirlineService {
         airlineAircraftService.ownershipTransfer(airlineAircraft, newOwner);
 
         airlineRepository.save(newOwner);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("Aircraft transfer was made", HttpStatus.OK);
     }
 
 }
