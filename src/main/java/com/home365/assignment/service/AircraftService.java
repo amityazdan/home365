@@ -17,17 +17,15 @@ public class AircraftService {
         this.aircraftRepository = aircraftRepository;
     }
 
-    public Aircraft addNewAircraft(AircraftDTO aircraftDTO){
-        if (aircraftRepository.findFirstByName(aircraftDTO.getName()) != null){
+    public Aircraft addNewAircraft(AircraftDTO aircraftDTO) {
+        if (aircraftRepository.findFirstByName(aircraftDTO.getName()) != null) {
             log.info("aircraft already exists");
             return null;
         }
         return aircraftRepository.save(new Aircraft(aircraftDTO));
     }
 
-    public Aircraft findFirstByName(String name){
+    public Aircraft findFirstByName(String name) {
         return aircraftRepository.findFirstByName(name);
     }
-
-
 }

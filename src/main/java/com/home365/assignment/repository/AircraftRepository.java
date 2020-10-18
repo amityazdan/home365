@@ -6,7 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AircraftRepository extends JpaRepository<Aircraft, Long> {
-
     Aircraft findFirstByName(String name);
-
 }

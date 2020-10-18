@@ -22,7 +22,6 @@ public class AirlineAircraftService {
         return airlineAircraftRepository.save(airlineAircraft);
     }
 
-
     public Airline sellAircraft(Long airlineAircraftId) {
         AirlineAircraft airlineAircraft = airlineAircraftRepository.findById(airlineAircraftId).orElse(null);
         if (airlineAircraft == null) {

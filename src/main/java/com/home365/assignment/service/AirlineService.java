@@ -36,7 +36,6 @@ public class AirlineService {
         this.aircraftService = aircraftService;
     }
 
-
     public Airline addNewAirline(AirlineDTO airlineDTO) {
         if (airlineRepository.findFirstByName(airlineDTO.getName()) != null) {
             return null;
@@ -146,5 +145,4 @@ public class AirlineService {
         airlineRepository.save(newOwner);
         return new ResponseEntity<>("Aircraft transfer was made", HttpStatus.OK);
     }
-
 }
